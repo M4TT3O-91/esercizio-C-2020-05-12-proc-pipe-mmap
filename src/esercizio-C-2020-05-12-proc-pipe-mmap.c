@@ -36,7 +36,6 @@
 
 #include <openssl/evp.h>
 
-
 #define FILE_SIZE 1024*1024*16
 #define HANDLE_ERROR(msg) { fprintf(stderr, "%s\n", msg); exit(EXIT_FAILURE); }
 #define HANDLE_ERROR2(msg, mdctx) { fprintf(stderr, "%s\n", msg); EVP_MD_CTX_destroy(mdctx); exit(EXIT_FAILURE); }
@@ -103,7 +102,18 @@ int main(int argc, char *argv[]) {
 		// pipe vuota: read() si blocca in attesa di dati
 		while ((res = read(pipe_fd[0], child_buffer, file_size)) > 0) {
 			printf("[child] read %d byte from pipe\n", res);
+			char *digest;
+			int digest_len;
+			digest = sha3_512(addr, file_size, &digest_len);
 
+			// copy hash to memory map
+			memcpy(addr, digest, digest_len);
+
+			printf("SHA3_512 del file %s è il seguente: ", file_name);
+
+			for (int i = 0; i < 512 / 8; i++) {
+				printf("%02x", addr[i] & 0xFF);
+			}
 
 		}
 
@@ -177,13 +187,13 @@ __off_t get_fd_size(int fd) {
 	return sb.st_size;
 }
 
-unsigned char * sha3_512(char * addr, unsigned int size, int * result_len_ptr) {
+unsigned char* sha3_512(char *addr, unsigned int size, int *result_len_ptr) {
 
-	EVP_MD_CTX * mdctx;
+	EVP_MD_CTX *mdctx;
 	int val;
-	unsigned char * digest;
+	unsigned char *digest;
 	unsigned int digest_len;
-	EVP_MD * algo = NULL;
+	EVP_MD *algo = NULL;
 
 	algo = EVP_sha3_512();
 
@@ -203,7 +213,7 @@ unsigned char * sha3_512(char * addr, unsigned int size, int * result_len_ptr) {
 
 	digest_len = EVP_MD_size(algo); // sha3_512 returns a 512 bit hash
 
-	if ((digest = (unsigned char *)OPENSSL_malloc(digest_len)) == NULL) {
+	if ((digest = (unsigned char*) OPENSSL_malloc(digest_len)) == NULL) {
 		HANDLE_ERROR2("OPENSSL_malloc() error", mdctx)
 	}
 
@@ -213,7 +223,7 @@ unsigned char * sha3_512(char * addr, unsigned int size, int * result_len_ptr) {
 		HANDLE_ERROR2("EVP_DigestFinal_ex() error", mdctx)
 	}
 
-	char * result = malloc(digest_len);
+	char *result = malloc(digest_len);
 	if (result == NULL) {
 		perror("malloc()");
 		exit(EXIT_FAILURE);
