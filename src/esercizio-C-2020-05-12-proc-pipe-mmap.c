@@ -47,14 +47,12 @@ unsigned char* sha3_512(char *addr, unsigned int size, int *result_len_ptr);
 
 int main(int argc, char *argv[]) {
 
-	//char *file_name;
-	char *file_name = "/home/matteo/prova.txt";
+	char *file_name = "input.txt";
+	//char *file_name = "/home/matteo/prova.txt";
 
-//	if (argc > 1) {
-//		file_name = strcat(file_name, argv[1]);
-//	} else {
-//		file_name = strcat(file_name, "prova.txt");
-//	}
+	if (argc > 1) {
+			file_name = argv[1];
+		}
 
 	int fd = open(file_name,
 	O_RDONLY,
@@ -79,10 +77,10 @@ int main(int argc, char *argv[]) {
 	char *addr;
 
 	addr = mmap(NULL, // NULL: è il kernel a scegliere l'indirizzo
-			file_size, // dimensione della memory map
+			FILE_SIZE, // dimensione della memory map
 			PROT_READ | PROT_WRITE, // memory map leggibile e scrivibile
-			MAP_SHARED, // memory map condivisibile con altri processi
-			fd, 0);
+			MAP_SHARED |MAP_ANONYMOUS, // memory map condivisibile con altri processi
+			-1, 0);
 
 	switch (fork()) {
 	case -1:
@@ -108,8 +106,9 @@ int main(int argc, char *argv[]) {
 
 			// copy hash to memory map
 			memcpy(addr, digest, digest_len);
+			printf("[child] scritto %d caratteri SHA3_512 in memoria condivisa\n",digest_len);
 
-			printf("SHA3_512 del file %s è il seguente: ", file_name);
+			printf("SHA3_512 del file è il seguente: ", file_name);
 
 			for (int i = 0; i < 512 / 8; i++) {
 				printf("%02x", addr[i] & 0xFF);
