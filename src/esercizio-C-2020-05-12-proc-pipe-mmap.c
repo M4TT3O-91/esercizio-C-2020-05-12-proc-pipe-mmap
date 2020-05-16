@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 	addr = mmap(NULL, // NULL: è il kernel a scegliere l'indirizzo
 			FILE_SIZE, // dimensione della memory map
 			PROT_READ | PROT_WRITE, // memory map leggibile e scrivibile
-			MAP_SHARED |MAP_ANONYMOUS, // memory map condivisibile con altri processi
+			MAP_SHARED | MAP_ANONYMOUS, // memory map condivisibile con altri processi
 			-1, 0);
 
 	switch (fork()) {
