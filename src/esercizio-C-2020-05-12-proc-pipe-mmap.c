@@ -51,8 +51,8 @@ int main(int argc, char *argv[]) {
 	//char *file_name = "/home/matteo/prova.txt";
 
 	if (argc > 1) {
-			file_name = argv[1];
-		}
+		file_name = argv[1];
+	}
 
 	int fd = open(file_name,
 	O_RDONLY,
@@ -106,12 +106,9 @@ int main(int argc, char *argv[]) {
 
 			// copy hash to memory map
 			memcpy(addr, digest, digest_len);
-			printf("[child] scritto %d caratteri SHA3_512 in memoria condivisa\n",digest_len);
-			printf("SHA3_512 del file è il seguente: \n");
-
-			for (int i = 0; i < 512 / 8; i++) {
-				printf("%02x", addr[i] & 0xFF);
-			}
+			printf(
+					"[child] scritto %d caratteri SHA3_512 in memoria condivisa\n",
+					digest_len);
 
 		}
 
@@ -146,7 +143,14 @@ int main(int argc, char *argv[]) {
 		close(pipe_fd[1]); // chiudiamo estremità di scrittura della pipe
 
 		wait(NULL);
-		printf("[parent] bye\n");
+		printf("*********************************************\n");
+		printf("SHA3_512 del file è il seguente: \n");
+
+		for (int i = 0; i < 512 / 8; i++) {
+			printf("%02x", addr[i] & 0xFF);
+		}
+
+		printf("\n[parent] bye\n");
 		free(parent_buffer);
 		exit(EXIT_SUCCESS);
 	}
