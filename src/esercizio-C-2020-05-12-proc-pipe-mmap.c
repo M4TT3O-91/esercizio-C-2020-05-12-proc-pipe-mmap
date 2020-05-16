@@ -100,14 +100,14 @@ int main(int argc, char *argv[]) {
 		// pipe vuota: read() si blocca in attesa di dati
 		while ((res = read(pipe_fd[0], child_buffer, file_size)) > 0) {
 			printf("[child] read %d byte from pipe\n", res);
-			char *digest;
+			unsigned char *digest;
 			int digest_len;
 			digest = sha3_512(addr, file_size, &digest_len);
 
 			// copy hash to memory map
 			memcpy(addr, digest, digest_len);
 			printf("[child] scritto %d caratteri SHA3_512 in memoria condivisa\n",digest_len);
-			printf("SHA3_512 del file è il seguente: ", file_name);
+			printf("SHA3_512 del file è il seguente: \n");
 
 			for (int i = 0; i < 512 / 8; i++) {
 				printf("%02x", addr[i] & 0xFF);
@@ -186,7 +186,6 @@ __off_t get_fd_size(int fd) {
 unsigned char* sha3_512(char *addr, unsigned int size, int *result_len_ptr) {
 
 	EVP_MD_CTX *mdctx;
-	int val;
 	unsigned char *digest;
 	unsigned int digest_len;
 	EVP_MD *algo = NULL;
@@ -219,7 +218,7 @@ unsigned char* sha3_512(char *addr, unsigned int size, int *result_len_ptr) {
 		HANDLE_ERROR2("EVP_DigestFinal_ex() error", mdctx)
 	}
 
-	char *result = malloc(digest_len);
+	unsigned char *result = malloc(digest_len);
 	if (result == NULL) {
 		perror("malloc()");
 		exit(EXIT_FAILURE);
