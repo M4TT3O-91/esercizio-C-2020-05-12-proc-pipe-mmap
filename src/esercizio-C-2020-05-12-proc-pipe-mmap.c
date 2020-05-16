@@ -107,7 +107,6 @@ int main(int argc, char *argv[]) {
 			// copy hash to memory map
 			memcpy(addr, digest, digest_len);
 			printf("[child] scritto %d caratteri SHA3_512 in memoria condivisa\n",digest_len);
-
 			printf("SHA3_512 del file è il seguente: ", file_name);
 
 			for (int i = 0; i < 512 / 8; i++) {
@@ -145,8 +144,7 @@ int main(int argc, char *argv[]) {
 		printf("[parent] %d bytes written to pipe\n", res);
 
 		close(pipe_fd[1]); // chiudiamo estremità di scrittura della pipe
-		// dall'altra parte verrà segnalato EOF
-//		printf("[parent] before wait()\n");
+
 		wait(NULL);
 		printf("[parent] bye\n");
 		free(parent_buffer);
@@ -168,7 +166,6 @@ __off_t get_file_size(char *file_name) {
 		perror("stat()");
 		return -1;
 	}
-
 	return sb.st_size;
 }
 
